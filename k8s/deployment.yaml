@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudmart-backend
+  labels:
+    app: cloudmart-backend
+spec:
+  replicas: 2   # run 2 copies for basic high availability
+  selector:
+    matchLabels:
+      app: cloudmart-backend
+  template:
+    metadata:
+      labels:
+        app: cloudmart-backend
+    spec:
+      containers:
+        - name: cloudmart-backend
+          image: navyaarunachala1/cloudmart-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
