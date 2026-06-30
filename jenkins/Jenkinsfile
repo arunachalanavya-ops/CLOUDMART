@@ -57,10 +57,6 @@ pipeline {
     post {
         success {
             echo 'Deployment Successful!'
-            sh '''
-            kubectl get pods
-            kubectl get svc
-            '''
         }
 
         failure {
