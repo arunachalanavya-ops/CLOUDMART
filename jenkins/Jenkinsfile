@@ -17,6 +17,11 @@ pipeline {
         }
 
         stage('Build Application') {
+            agent{
+                docker {
+                    image 'maven:3.8.4-openjdk-17'
+                }
+            }
             steps {
                 dir('backend') {
                     sh 'mvn clean package'
