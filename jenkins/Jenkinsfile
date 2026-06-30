@@ -4,7 +4,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "navyaarunachala1/cloudmart-backend:latest"
-        DOCKER_CREDENTIALS = "dockerhub"
     }
 
     stages {
@@ -12,12 +11,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Build JAR') {
-            steps {
-                sh 'mvn clean package -DskipTests'
             }
         }
 
@@ -61,7 +54,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Deployment Successful!'
             sh '''
             kubectl get pods
             kubectl get svc
