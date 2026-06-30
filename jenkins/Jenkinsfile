@@ -9,31 +9,21 @@ pipeline {
 
     stages {
 
-        stage('Checkout Source Code') {
+        stage('Checkout') {
             steps {
-                echo "Checking out source code..."
                 checkout scm
             }
         }
 
-        stage('Build Application') {
-            agent{
-                docker {
-                    image 'maven:3.8.4-openjdk-17'
-                }
-            }
+        stage('Build JAR') {
             steps {
-                dir('backend') {
-                    sh 'mvn clean package'
-                }
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                dir('backend') {
-                    sh 'docker build -t $IMAGE_NAME .'
-                }
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
@@ -41,12 +31,11 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: "${dockerhub}",
+                        credentialsId: 'dockerhub',
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-
                     sh '''
                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                     '''
@@ -62,23 +51,17 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-
                 sh '''
                 kubectl apply -f k8s/deployment.yaml
                 kubectl apply -f k8s/service.yaml
                 '''
-
             }
         }
-
     }
 
     post {
-
         success {
-
-            echo "Deployment Successful!"
-
+            echo 'Pipeline completed successfully!'
             sh '''
             kubectl get pods
             kubectl get svc
@@ -86,11 +69,7 @@ pipeline {
         }
 
         failure {
-
-            echo "Pipeline Failed v1"
-
+            echo 'Pipeline failed.'
         }
-
     }
-
 }
